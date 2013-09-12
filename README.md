@@ -6,15 +6,19 @@ A port of [ESMS](http://eli.thegreenplace.net/programs-and-code/esms/) to Scala
 
 No logic changes have been done for this first release. This means that when generating a roaster or simulating a match, the application should behave the same as its C++ counterpart in its v.2.7.3 release.
 
-That said, besides the obvious change of porting the source to Scala, I've done some other minor modifications:
+That said, besides the obvious change of porting the source to Scala, the project is built differently, The original ESMS was a collection of executables that used plain-text files to communicate.
+In contrast, this port is a library. This means that it provides methods to emulate the functionality of ESMS, but it won't work on its own, you need to call the methods from another JVM application.
 
-* Purpose: the original ESMS produced a set of executables that could be run to do specific tasks. Instead, this implementation is intended to be used as a Jar that provides ways to do the same tasks and it's used inside of another application.
+Some relevant changes:
 
-* Use of JSON: the original API used plain-text files as input/output. The API now uses JSON to communicate with potential clients.
+* Use of JSON: the original API used plain-text files as input/output. The API now uses direct method calls to communicate with clients, but it also provides helper methods to convert data to JSON.
 
 * Countries: the original ESMS has a limited list of 20 countries. This has been extended to a list of all countries, and the official 2 letter country code is used to identify them
 
-* Random values: I use the Gaussian distribution provided by Scala. It is similar to the one used by ESMS and it should give similar ranges of values/ I may modify this in the future.
+* Random values: I use the Gaussian distribution provided by Scala. It is similar to the one used by ESMS and it should give similar ranges of values. I may modify this in the future.
+
+* Fixtures: I use a Round robin generation algorithm adapted to scala. The algorithm has the same limitations than ESMS when trying to schedule games away/home, it should work well enough for leagues with many teams, may have some issues with smaller leagues
+
 
 # Dependencies
 
