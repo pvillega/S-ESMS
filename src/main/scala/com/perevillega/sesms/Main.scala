@@ -13,11 +13,11 @@ object Main  extends App {
 //  roster.players.foreach(println(_))
 
   // generate fixtures
-  val teams = List("1","2","3","4")
-  val fixtures = Fixtures.createFixtures(teams)
-  fixtures.foreach(println(_))
-
-  val teams2 = List("1","2","3","4","5")
-  val fixtures2 = Fixtures.createFixtures(teams2)
-  fixtures2.foreach(println(_))
+//  val teams = List("1","2","3","4")
+//  val fixtures = Fixtures.createFixtures(teams)
+//  fixtures.foreach(println(_))
+//
+//  val teams2 = List("1","2","3","4","5")
+//  val fixtures2 = Fixtures.createFixtures(teams2)
+//  fixtures2.foreach(println(_))
 }

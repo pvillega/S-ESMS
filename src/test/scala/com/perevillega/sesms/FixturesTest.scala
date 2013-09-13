@@ -7,7 +7,7 @@ import play.api.libs.json.{JsArray, Json}
 import com.perevillega.sesms.support.Country
 
 /**
- * Tests for FixturesTest
+ * Tests for Fixtures
  * User: pvillega
  */
 class FixturesTest extends FunSpec with ShouldMatchers with PrivateMethodTester {
