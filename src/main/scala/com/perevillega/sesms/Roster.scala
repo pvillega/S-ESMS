@@ -1,9 +1,51 @@
 package com.perevillega.sesms
 
-import play.api.libs.json.{JsValue, Json}
-import com.perevillega.sesms.support.{RandomUtils, Country, RosterConfig}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+import com.perevillega.sesms.support.{EnumUtils, RandomUtils, Country, RosterConfig}
 import scala.util.Random
 import org.slf4j.LoggerFactory
+import com.perevillega.sesms.PlayerType.PlayerType
+import com.perevillega.sesms.TacticType.TacticType
+
+/**
+ * Enum used to define the tactic type selected
+ */
+object TacticType extends Enumeration {
+  type TacticType = Value
+
+  val N = Value("N")
+  val D = Value("D")
+  val A = Value("A")
+  val C = Value("C")
+  val L = Value("L")
+  val P = Value("P")
+
+  implicit val enumReads: Reads[TacticType] = EnumUtils.enumReads(TacticType)
+
+  implicit def enumWrites: Writes[TacticType] = EnumUtils.enumWrites
+
+}
+
+
+/**
+ * Enum used when creating roster to identify type of player
+ * After generation players are not identified in a specific role, managers can use them anywhere
+ */
+object PlayerType extends Enumeration {
+  type PlayerType = Value
+
+  val GK = Value("GK")
+  val DF = Value("DF")
+  val MF = Value("MF")
+  val DMF = Value("DMF")
+  val AMF = Value("AMF")
+  val FW = Value("FW")
+
+  implicit val enumReads: Reads[PlayerType] = EnumUtils.enumReads(PlayerType)
+
+  implicit def enumWrites: Writes[PlayerType] = EnumUtils.enumWrites
+}
 
 
 /**
@@ -47,12 +89,6 @@ case class Player(name: String, team: String, nationality: Country, prefSide: St
 case class PlayerStats(stop: Int, tackle: Int, pass: Int, shoot: Int, aggression: Int, stamina: Int,
                        stopAb: Int, tackleAb: Int, passAb: Int, shootAb: Int)
 
-/**
- * The roster of a team
- * @param players players that belong to the roster
- */
-case class Roster(players: List[Player])
-
 
 object PlayerStats {
   /**
@@ -61,6 +97,7 @@ object PlayerStats {
    */
   implicit val fmt = Json.format[PlayerStats]
 }
+
 
 object Player {
   /**
@@ -86,13 +123,110 @@ object Player {
 
 
 /**
- * Enum used when creating roster to identify type of player
- * After generation players are not identified in a specific role, managers can use them anywhere
+ * A TeamSheet, used to define a team that will play a match, as per ESMS 2.7.3 specification
+ * @param team name of the team
+ * @param tactic selected tactic (normal, defensive, etc)
+ * @param starting starting eleven, by position
+ * @param subs subs, by position
+ * @param penaltyKicker player selected to shoot penalties
+ * @param commands commands to execute during the game simulation
  */
-object PlayerType extends Enumeration {
-  type PlayerType = Value
-  val GK, DF, DMF, MF, AMF, FW = Value
+case class TeamSheet(team: String, tactic: TacticType, starting: List[(PlayerType, String)], subs: List[(PlayerType, String)], penaltyKicker: String, commands: List[String])
+
+
+object TeamSheet {
+
+  implicit def reads: Reads[(PlayerType, String)] =
+    ((JsPath \ "position").read[PlayerType] and
+      (JsPath \ "name").read[String]).tupled
+
+  implicit def writes = new Writes[(PlayerType, String)] {
+    def writes(v: (PlayerType, String)): JsValue = Json.obj(
+      "position" -> v._1,
+      "name" -> v._2
+    )
+  }
+
+  /**
+   * Support object to convert TeamSheet to Json
+   * Needs to be above classes that require it for the macro to work
+   */
+  implicit val fmt = Json.format[TeamSheet]
+
+  /**
+   * Constructs a TeamSheet from its Json version
+   * @param json Json value that contains a TeamSheet
+   * @return a TeamSheet object built from the json parameter
+   */
+  def fromJson(json: JsValue): TeamSheet = Json.fromJson[TeamSheet](json).get
+
+  /**
+   * Creates a json version of the TeamSheet
+   * @param teamSheet the TeamSheet object to convert to json
+   * @return a JsValue with the TeamSheet
+   */
+  def toJson(teamSheet: TeamSheet): JsValue = Json.toJson(teamSheet)
 }
+
+/**
+ * The roster of a team
+ * @param players players that belong to the roster
+ */
+case class Roster(players: List[Player]) {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+  /**
+   * Creates a default team sheet given the current roster, as per TSC in ESMS 2.7.3
+   * Will throw exception if the roster doesn't contain enough players or the tactic doesn't add to 10
+   * @param defenders number of defenders
+   * @param midfielders number of midfielders
+   * @param attackers number of attackers
+   * @param tactic tactic type, defaults to N
+   * @param numSubs number of subs to choose, defaults to 7
+   */
+  def selectTeamforFormation(defenders: Int, midfielders: Int, attackers: Int, tactic: TacticType = TacticType.N, numSubs: Int = 7): TeamSheet = {
+    logger.info(s"Roster.selectTeamForFormation($defenders, $midfielders, $attackers, $tactic, $numSubs) - Start")
+    if (defenders + midfielders + attackers != 10) throw new IllegalArgumentException("Illegal Tactic. Tactic has to total 10, ex: 4-4-2.")
+    if (numSubs < 1) throw new IllegalArgumentException("Illegal subs: you need at least 1 sub (goalkeeper)")
+    if (players.length < defenders + midfielders + attackers + numSubs + 1) throw new IllegalStateException("List of Players in roster doesn't have enough players to create the Team Sheet")
+
+    val gk = players.sortBy(-_.stats.stop).take(1).map(p => (PlayerType.GK, p.name))
+    logger.debug(s"GK - $gk")
+    val df = players.filterNot(p => gk contains p).sortBy(-_.stats.tackle).take(defenders).map(p => (PlayerType.DF, p.name))
+    logger.debug(s"DF - $df")
+    val mf = players.filterNot(p => gk.contains(p) || df.contains(p)).sortBy(-_.stats.pass).take(midfielders).map(p => (PlayerType.MF, p.name))
+    logger.debug(s"MF - $mf")
+    val fw = players.filterNot(p => gk.contains(p) || df.contains(p) || mf.contains(p)).sortBy(-_.stats.shoot).take(attackers).map(p => (PlayerType.FW, p.name))
+    logger.debug(s"FW - $fw")
+    val starting = gk ::: df ::: mf ::: fw
+
+    val possibleSubs = players.filterNot(p => starting contains p)
+    val addSubs = numSubs - 1
+    val dfSub = (addSubs / 5) * 2 + (if (addSubs % 5 > 2) 2 else if (addSubs % 5 > 0) 1 else 0)
+    val mfSub = (addSubs / 5) * 2 + (if (addSubs % 5 > 4) 2 else if (addSubs % 5 > 1) 1 else 0)
+    val fwSub = (addSubs / 5) * 1 + (if (addSubs % 5 > 3) 1 else 0)
+    logger.debug(s"Subs: DF - $dfSub  MF - $mfSub  FW - $fwSub")
+
+    val sgk = possibleSubs.sortBy(-_.stats.stop).take(1).map(p => (PlayerType.GK, p.name))
+    logger.debug(s"SGK - $sgk")
+    val sdf = possibleSubs.filterNot(p => sgk contains p).sortBy(-_.stats.tackle).take(dfSub).map(p => (PlayerType.DF, p.name))
+    logger.debug(s"SDF - $sdf")
+    val smf = possibleSubs.filterNot(p => sgk.contains(p) || sdf.contains(p)).sortBy(-_.stats.pass).take(mfSub).map(p => (PlayerType.MF, p.name))
+    logger.debug(s"SMF - $smf")
+    val sfw = possibleSubs.filterNot(p => sgk.contains(p) || sdf.contains(p) || smf.contains(p)).sortBy(-_.stats.shoot).take(fwSub).map(p => (PlayerType.FW, p.name))
+    logger.debug(s"SFW - $sfw")
+    val subs = sgk ::: sdf ::: smf ::: sfw
+
+    val kicker = starting.last._2
+    logger.debug(s"Kicker - $kicker")
+
+    val teamSheet = TeamSheet(players(0).team, tactic, starting, subs, kicker, Nil)
+    logger.info(s"Roster.selectTeamForFormation($defenders, $midfielders, $attackers, $tactic, $numSubs) - Result[$teamSheet]")
+    teamSheet
+  }
+
+}
+
 
 object Roster {
   private val logger = LoggerFactory.getLogger(this.getClass)

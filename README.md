@@ -13,12 +13,15 @@ Some relevant changes:
 
 * Use of JSON: the original API used plain-text files as input/output. The API now uses direct method calls to communicate with clients, but it also provides helper methods to convert data to JSON.
 
+* Additional classes: to facilitate implementation some new classes are added to the source, like a TeamSheet class or a Country class.
+
 * Countries: the original ESMS has a limited list of 20 countries. This has been extended to a list of all countries, and the official 2 letter country code is used to identify them
 
 * Random values: I use the Gaussian distribution provided by Scala. It is similar to the one used by ESMS and it should give similar ranges of values. I may modify this in the future.
 
 * Fixtures: I use a Round robin generation algorithm adapted to scala. The algorithm has the same limitations than ESMS when trying to schedule games away/home, it should work well enough for leagues with many teams, may have some issues with smaller leagues
 
+* TSC: the functionality to create a default team is now a method in the Roster class, which takes the Roster and a given tactic and selects a "best team" (as per TSC in ESMS 2.7.3 specifications)
 
 # Dependencies
 

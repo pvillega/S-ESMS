@@ -6,6 +6,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.PrivateMethodTester
 import play.api.libs.json.{JsArray, Json}
 import com.perevillega.sesms.support.Country
+import java.lang.IllegalArgumentException
 
 /**
  * Tests for Roster
@@ -21,28 +22,28 @@ class RosterTest extends FunSpec with ShouldMatchers with PrivateMethodTester {
       val name3 = Roster.generateName()
       val name4 = Roster.generateName()
 
-      name.size should be <=(14)
+      name.size should be <= (16)
       name.head.isUpper should be(true)
       name.charAt(1) should be('.')
       name.charAt(2) should be(' ')
       name.charAt(3).isUpper should be(true)
       name.charAt(4).isUpper should be(false)
 
-      name2.size should be <=(14)
+      name2.size should be <= (16)
       name2.head.isUpper should be(true)
       name2.charAt(1) should be('.')
       name2.charAt(2) should be(' ')
       name2.charAt(3).isUpper should be(true)
       name2.charAt(4).isUpper should be(false)
 
-      name3.size should be <=(14)
+      name3.size should be <= (16)
       name3.head.isUpper should be(true)
       name3.charAt(1) should be('.')
       name3.charAt(2) should be(' ')
       name3.charAt(3).isUpper should be(true)
       name3.charAt(4).isUpper should be(false)
 
-      name4.size should be <=(14)
+      name4.size should be <= (16)
       name4.head.isUpper should be(true)
       name4.charAt(1) should be('.')
       name4.charAt(2) should be(' ')
@@ -196,8 +197,161 @@ class RosterTest extends FunSpec with ShouldMatchers with PrivateMethodTester {
 
   describe("A Roster class") {
 
-    // Empty
+    it("should fail when creating a team sheet from empty roster") {
+      val roster = Roster(Nil)
+      evaluating {
+        roster.selectTeamforFormation(4, 4, 2)
+      } should produce[IllegalStateException]
+    }
 
+    it("should fail when creating a team sheet from roster with not enough players") {
+      val players = Player("1", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("2", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("3", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("4", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("5", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("6", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Nil
+      val roster = Roster(players)
+      evaluating {
+        roster.selectTeamforFormation(4, 4, 2)
+      } should produce[IllegalStateException]
+    }
+
+    it("should fail when creating a team sheet using invalid tactic") {
+      val players = Player("1", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("2", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("3", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("4", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("5", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("6", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("7", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("8", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("9", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("10", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("11", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S1", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S2", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S3", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S4", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S5", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S6", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S7", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Nil
+      val roster = Roster(players)
+      evaluating {
+        roster.selectTeamforFormation(0, 0, 0)
+      } should produce[IllegalArgumentException]
+      evaluating {
+        roster.selectTeamforFormation(5, 5, 5)
+      } should produce[IllegalArgumentException]
+      evaluating {
+        roster.selectTeamforFormation(0, 99, 0)
+      } should produce[IllegalArgumentException]
+    }
+
+    it("should fail when creating a team sheet using less than 1 sub") {
+      val players = Player("1", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("2", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("3", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("4", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("5", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("6", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("7", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("8", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("9", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("10", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("11", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S1", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S2", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S3", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S4", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S5", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S6", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Player("S7", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+        Nil
+      val roster = Roster(players)
+      evaluating {
+        roster.selectTeamforFormation(4, 4, 2, TacticType.C, 0)
+      } should produce[IllegalArgumentException]
+      evaluating {
+        roster.selectTeamforFormation(4, 4, 2, TacticType.C, -1)
+      } should produce[IllegalArgumentException]
+    }
+
+    it("should select team from roster using 4-4-2 and 7 subs (default)") {
+      val players =
+        Player("GK", "T", Country("A", "A"), "D", 0, PlayerStats(15, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 15, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 15, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 15, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 15, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("FW", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 15, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("FW", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 15, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("GK", "T", Country("A", "A"), "D", 0, PlayerStats(14, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 14, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 14, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 14, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 14, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 14, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("FW", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 14, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Nil
+      val roster = Roster(players)
+      val teamSheet = roster.selectTeamforFormation(4, 4, 2)
+
+      teamSheet.team should be("T")
+      teamSheet.tactic should be(TacticType.N)
+      teamSheet.commands should be(Nil)
+
+      teamSheet.starting.length should be(11)
+      (0 until teamSheet.starting.length).map {
+        i => teamSheet.starting(i) should be((PlayerType.withName(players(i).name), players(i).name))
+      }
+
+      teamSheet.subs.length should be(7)
+      (0 until teamSheet.subs.length).map {
+        i => teamSheet.subs(i) should be((PlayerType.withName(players(i + 11).name), players(i + 11).name))
+      }
+    }
+
+    it("should select team from roster using 4-2-4 and 3 subs") {
+      val players =
+        Player("GK", "T", Country("A", "A"), "D", 0, PlayerStats(15, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 15, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 15, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 15, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("FW", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 15, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("FW", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 15, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("FW", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 15, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("FW", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 5, 15, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("GK", "T", Country("A", "A"), "D", 0, PlayerStats(14, 5, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("DF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 14, 5, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Player("MF", "T", Country("A", "A"), "D", 0, PlayerStats(5, 5, 14, 5, 5, 5, 5, 5, 5, 5), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ::
+          Nil
+      val roster = Roster(players)
+      val teamSheet = roster.selectTeamforFormation(4, 2, 4, TacticType.N, 3)
+
+      teamSheet.team should be("T")
+      teamSheet.tactic should be(TacticType.N)
+      teamSheet.commands should be(Nil)
+
+      teamSheet.starting.length should be(11)
+      (0 until teamSheet.starting.length).map {
+        i => teamSheet.starting(i) should be((PlayerType.withName(players(i).name), players(i).name))
+      }
+
+      teamSheet.subs.length should be(3)
+      (0 until teamSheet.subs.length).map {
+        i => teamSheet.subs(i) should be((PlayerType.withName(players(i + 11).name), players(i + 11).name))
+      }
+    }
   }
 
 }
