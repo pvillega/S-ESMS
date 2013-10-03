@@ -41,7 +41,7 @@ object RandomUtils {
     val gaussian = Random.nextGaussian()
     val dev = (maxDev * gaussian).abs.floor.toInt
     val result = average + dev
-    logger.debug(s"RandomUtils.averagedRandom($average, $maxDev) - Gauss: $gaussian - Dev: $dev - Result [$result]")
+    logger.trace(s"RandomUtils.averagedRandom($average, $maxDev) - Gauss: $gaussian - Dev: $dev - Result [$result]")
     result
   }
 

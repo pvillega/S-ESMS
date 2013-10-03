@@ -1,14 +1,12 @@
 import sbt._
 import Keys._
-import sbtassembly.Plugin._
-import AssemblyKeys._
 
 object SESMSBuild extends Build {
   val Organization = "com.perevillega"
   val Version      = "0.1"
   val ScalaVersion = "2.10.2"
 
-  lazy val mindCandySample = Project(
+  lazy val sesmsProject = Project(
     id = "s-esms",
     base = file("."),
     settings = defaultSettings ++ Seq(
@@ -26,7 +24,7 @@ object SESMSBuild extends Build {
     organizationHomepage := Some(url("http://www.perevillega.com"))
   )
   
-  lazy val defaultSettings = buildSettings ++ assemblySettings ++ Seq(
+  lazy val defaultSettings = buildSettings ++ Seq(
     // compile options
     scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked"),
     javacOptions  ++= Seq("-Xlint:unchecked", "-Xlint:deprecation")

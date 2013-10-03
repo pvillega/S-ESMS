@@ -99,7 +99,7 @@ case class LeagueTable(table: Map[String, TableEntry]) {
   def addTeam(name: String): LeagueTable = {
     logger.info(s"LeagueTable.addTeam($name) - team exists? ${table.contains(name)}")
     val tableEntry = TableEntry(name, 0, 0, 0, 0, 0)
-    val newTable = table -(name) +(name -> tableEntry)
+    val newTable = table - name +(name -> tableEntry)
     val league = LeagueTable(newTable)
     logger.info(s"LeagueTable.addTeam($name) - Results [$league]")
     league
@@ -130,8 +130,8 @@ case class LeagueTable(table: Map[String, TableEntry]) {
       val awayScored = awayTeam.goalsScored + mr.goalsAway
       val awayReceived = awayTeam.goalsReceived + mr.goalsHome
 
-      List( (homeTeam.team -> TableEntry(homeTeam.team, homeWins, homeDraw, homeLost, homeScored, homeReceived)),
-        (awayTeam.team -> TableEntry(awayTeam.team, awayWins, awayDraw, awayLost, awayScored, awayReceived)) )
+      List( homeTeam.team -> TableEntry(homeTeam.team, homeWins, homeDraw, homeLost, homeScored, homeReceived),
+        awayTeam.team -> TableEntry(awayTeam.team, awayWins, awayDraw, awayLost, awayScored, awayReceived) )
     }.toMap
 
     val league = LeagueTable(newTable)

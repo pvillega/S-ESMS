@@ -2,7 +2,7 @@ package com.perevillega.sesms
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import com.perevillega.sesms.support.{EnumUtils, RandomUtils, Country, RosterConfig}
+import com.perevillega.sesms.support._
 import scala.util.Random
 import org.slf4j.LoggerFactory
 import com.perevillega.sesms.PlayerType.PlayerType
@@ -258,15 +258,16 @@ object Roster {
    * @param config configuration to use when generating the roster
    * @param team to which team does the roster belong
    */
-  def createRoster(config: RosterConfig, team: String): Roster = {
+  def createRoster(config: Config, team: String): Roster = {
     logger.info(s"Roster.createRoster($config, $team)")
+    val rosterConfig = config.rosterConfig
     // generate players
-    val goalkeepers = (1 to config.numGoalkeepers).map(i => generateRandomPlayer(config, team, GK)).toList
-    val defenders = (1 to config.numDefenders).map(i => generateRandomPlayer(config, team, DF)).toList
-    val defensiveMid = (1 to config.numDefensiveMidfielders).map(i => generateRandomPlayer(config, team, DMF)).toList
-    val midfielders = (1 to config.numMidfielders).map(i => generateRandomPlayer(config, team, MF)).toList
-    val attackingMid = (1 to config.numAttackMidfielders).map(i => generateRandomPlayer(config, team, AMF)).toList
-    val forwards = (1 to config.numForwards).map(i => generateRandomPlayer(config, team, FW)).toList
+    val goalkeepers = (1 to rosterConfig.numGoalkeepers).map(i => generateRandomPlayer(rosterConfig, team, GK)).toList
+    val defenders = (1 to rosterConfig.numDefenders).map(i => generateRandomPlayer(rosterConfig, team, DF)).toList
+    val defensiveMid = (1 to rosterConfig.numDefensiveMidfielders).map(i => generateRandomPlayer(rosterConfig, team, DMF)).toList
+    val midfielders = (1 to rosterConfig.numMidfielders).map(i => generateRandomPlayer(rosterConfig, team, MF)).toList
+    val attackingMid = (1 to rosterConfig.numAttackMidfielders).map(i => generateRandomPlayer(rosterConfig, team, AMF)).toList
+    val forwards = (1 to rosterConfig.numForwards).map(i => generateRandomPlayer(rosterConfig, team, FW)).toList
 
     val roster = Roster(goalkeepers ::: defenders ::: defensiveMid ::: midfielders ::: attackingMid ::: forwards)
     logger.info(s"Roster.createRoster($config, $team) - Roster: [$roster]")
@@ -419,9 +420,9 @@ object Roster {
 
     val name = Random.shuffle(vowelish ::: consonantish).head.head
     val genSurname = if (Random.nextBoolean()) {
-      Random.shuffle(vowelish).head + nextLetterInName(true, nameLength)
+      Random.shuffle(vowelish).head + nextLetterInName(vowel = true, nameLength)
     } else {
-      Random.shuffle(consonantish).head + nextLetterInName(false, nameLength)
+      Random.shuffle(consonantish).head + nextLetterInName(vowel = false, nameLength)
     }
 
     val surname = if (genSurname.size > 12) genSurname.substring(0, cutLength) else genSurname

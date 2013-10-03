@@ -8,10 +8,6 @@ import com.perevillega.sesms.support.RosterConfig
  */
 object Main  extends App {
 
-  // generate and print a standard roster
-//  val roster = Roster.createRoster(RosterConfig.getDefaultRosterConfig(), "MyTeam")
-//  roster.players.foreach(println(_))
-
   // generate fixtures
 //  val teams = List("1","2","3","4")
 //  val fixtures = Fixtures.createFixtures(teams)

@@ -1,6 +1,14 @@
 # S-ESMS
 
-A port of [ESMS](http://eli.thegreenplace.net/programs-and-code/esms/) to Scala
+A port of [ESMS](http://eli.thegreenplace.net/programs-and-code/esms/) to Scala. It preserves most of the aspects of the original code, with some improvements.
+
+WARNING: the code is not the best Scala I've written, ESMS is a C++ app broken into several
+
+# What's ESMS
+
+[ESMS](http://eli.thegreenplace.net/programs-and-code/esms/) is an acronym for Electronic Soccer Management Simulator. It is a program, or rather a family of programs, that allows people to run fantasy soccer management games. Think of a soccer computer game, like Championship Manager, for example. It allows you to build a team of players and manage them through a soccer league, setting the opening squad, tactics and formations, substituting players etc. You deal with player injuries, suspensions, transfers and all the other aspects of soccer team management.
+
+ESMS gives you these abilities, but submits the whole league to your control, and not the PC’s. That means that you decide how your league looks like, what teams play (these are often completely made-up, fantasy teams, and not copies of real soccer teams), who are the managers (it can be your friends, or just people from the Internet who want to play), etc. It’s really a wholly another concept, which might be difficult to get used to unless you know what you want. The best advice I can give at this point is to look at some existing fantasy leagues online that use ESMS, to get a feel of how these things work (it is as simple as looking for “esms soccer league” or something similar in your favorite web-search engine).
 
 # Changes from original ESMS
 
@@ -22,6 +30,30 @@ Some relevant changes:
 * Fixtures: I use a Round robin generation algorithm adapted to scala. The algorithm has the same limitations than ESMS when trying to schedule games away/home, it should work well enough for leagues with many teams, may have some issues with smaller leagues
 
 * TSC: the functionality to create a default team is now a method in the Roster class, which takes the Roster and a given tactic and selects a "best team" (as per TSC in ESMS 2.7.3 specifications)
+
+# Comments
+
+Comments have been ported to `Properties` format. Unfortunately, due to the nature of Properties files duplicate keys are not allowed.
+Given that we may want multiple strings to describe an event a custom formatting is applied to this file, so it can be easily translated and it also allows for multiple values for an event.
+
+Keys matching a single value work as normal ( key = value)
+
+Keys matching multiple values have 2 parts:
+
+- First part is the key along the number of options for the given key ( key = n)
+- Second part is a list of the key plus a number (1 to n) that lists the multiple options for the key (key.1 = a, key.2 = b, etc)
+
+The helper class that reads this file will load the values accordingly and return a random one to provide some variety in comments
+
+# Config
+
+Configuration has been unified to a single bundle `Config.properties`. The keys are similar to the ones in ESMS 2.7.3, adapted to bundle format.
+
+The configuration has been broken into several classes, each one tackling specific aspects of the configuration. In some cases limitations in case classes and the JSON formatter mean some additional classes were required.
+
+Config values use by default the values in ESMS 2.7.3, and a hardcoded version of these values can be obtained via the method `Config.getDefaultConfig`.
+
+You can modify the Config bundle to generate different values, or just create your config from scratch by building the corresponding hierarchy of objects or by creating a Config object from a JSON string..
 
 # Dependencies
 
