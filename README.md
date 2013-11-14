@@ -1,5 +1,7 @@
 # S-ESMS
 
+**NOTE: The project is kind of dead due to lack of time, feel free to use and fork the code, I may retake it later on**
+
 A port of [ESMS](http://eli.thegreenplace.net/programs-and-code/esms/) to Scala. It preserves most of the aspects of the original code, with some improvements.
 
 WARNING: the code is not the best Scala I've written, ESMS is a C++ app broken into several
